@@ -1,0 +1,5 @@
+<!-- app.launch is blank because we assume that the server is brought up by RWS.
+     This means that other apps that depend on map_annotator (e.g., CodeIt) don't
+     require the user to open the Map Annotator app first. -->
+<launch>
+</launch>
