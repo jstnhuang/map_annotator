@@ -96,6 +96,8 @@ class PoseMarkers(object):
     def _update_pose(self, feedback):
         if feedback.event_type == InteractiveMarkerFeedback.POSE_UPDATE:
             self._database.add(feedback.marker_name, feedback.pose)
+            self._im_server.setPose(feedback.marker_name, feedback.pose)
+            self._im_server.applyChanges()
 
 
 class PoseDatabase(object):
