@@ -140,9 +140,9 @@ def is_done_state(state):
     Args:
         state: int, an actionlib_msgs/GoalStatus value.
     """
-    return (status == GoalStatus.RECALLED or status == GoalStatus.REJECTED
-            or status == GoalStatus.PREEMPTED or status == GoalStatus.ABORTED
-            or status == GoalStatus.SUCCEEDED or status == GoalStatus.LOST)
+    return (state == GoalStatus.RECALLED or state == GoalStatus.REJECTED
+            or state == GoalStatus.PREEMPTED or state == GoalStatus.ABORTED
+            or state == GoalStatus.SUCCEEDED or state == GoalStatus.LOST)
 
 
 class Server(object):
@@ -152,7 +152,7 @@ class Server(object):
         self._marker_server = marker_server
         self._move_base_client = move_base_client
         self._as = actionlib.SimpleActionServer(
-            'go_to_location',
+            '/map_annotator/go_to_location',
             GoToLocationAction,
             execute_cb=self.execute_goto,
             auto_start=False)
