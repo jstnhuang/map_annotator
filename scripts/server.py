@@ -208,11 +208,13 @@ class Server(object):
                     rospy.logerr(result.error)
                     return
                 if is_done_state(self._move_base_client.get_state()):
-                    if self._move_base_client.get_state() == GoalStatus.SUCCEEDED:
+                    if self._move_base_client.get_state(
+                    ) == GoalStatus.SUCCEEDED:
                         self._as.set_succeeded(result)
                         return
                     else:
-                        result.error = 'The robot was unable to navigate to {}'.format(goal.name)
+                        result.error = 'The robot was unable to navigate to {}'.format(
+                            goal.name)
                         self._as.set_aborted(result, result.error)
                         rospy.logerr(result.error)
                         return
@@ -235,13 +237,13 @@ def main():
 
     database = PoseDatabase(db_path)
     list_pub = rospy.Publisher(
-        'pose_names', PoseNames, latch=True, queue_size=1)
-    im_server = InteractiveMarkerServer('map_poses')
+        '/map_annotator/pose_names', PoseNames, latch=True, queue_size=1)
+    im_server = InteractiveMarkerServer('/map_annotator/map_poses')
     marker_server = PoseMarkers(database, im_server)
     move_base = actionlib.SimpleActionClient('/move_base', MoveBaseAction)
     server = Server(database, list_pub, marker_server, move_base)
-    user_action_sub = rospy.Subscriber('user_actions', UserAction,
-                                       server.handle_user_action)
+    user_action_sub = rospy.Subscriber('/map_annotator/user_actions',
+                                       UserAction, server.handle_user_action)
 
     rospy.sleep(0.5)
     marker_server.start()

@@ -27,14 +27,14 @@
       auto
       last-message="{{poseList}}"
       on-message="handlePoseList"
-      topic="/pose_names"
+      topic="/map_annotator/pose_names"
       ros="{{ros}}"
       msg-type="map_annotator/PoseNames"
     ></ros-topic>
     <ros-topic
       auto
       id="userActions"
-      topic="/user_actions"
+      topic="/map_annotator/user_actions"
       ros="{{ros}}"
       msg-type="map_annotator/UserAction"
     ></ros-topic>
