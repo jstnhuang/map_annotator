@@ -1,0 +1,61 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/ros-topic/ros-topic.html">
+
+<dom-module id="map-annotator-pose">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-button {
+        background-color: #ccc;
+        margin-bottom: 10px;
+        text-transform: none;
+      }
+    </style>
+    <ros-topic
+      auto
+      id="userActions"
+      topic="/user_actions"
+      ros="{{ros}}"
+      msg-type="map_annotator/UserAction"
+    ></ros-topic>
+    {{name}}
+    <paper-button on-tap="handleGoTo">Go to</paper-button>
+    <paper-button on-tap="handleDelete">Delete</paper-button>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'map-annotator-pose',
+
+      properties: {
+        name: {
+          type: String,
+          value: ''
+        },
+        ros: Object,
+      },
+
+      handleGoTo: function() {
+        var msg = {
+          command: 'goto',
+          name: this.name,
+          updated_name: ''
+        };
+        this.$.userActions.publish(msg);
+      },
+
+      handleDelete: function() {
+        var msg = {
+          command: 'delete',
+          name: this.name,
+          updated_name: ''
+        };
+        this.$.userActions.publish(msg);
+      },
+    });
+  </script>
+</dom-module>
