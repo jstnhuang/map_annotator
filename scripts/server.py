@@ -166,27 +166,30 @@ class Server(object):
         self._publish_poses()
 
     def handle_user_action(self, action):
-        if action.command == UserAction.CREATE:
-            self._marker_server.create(action.name)
-            pose = self._marker_server.get(action.name).pose
-            self._db.add(action.name, pose)
-            self._publish_poses()
-        elif action.command == UserAction.DELETE:
-            self._marker_server.delete(action.name)
-            self._db.delete(action.name)
-            self._publish_poses()
-        elif action.command == UserAction.GOTO:
-            pose = self._db.get(action.name)
-            if pose is None:
-                rospy.logerr('No pose named {}'.format(action.name))
+        try:
+            if action.command == UserAction.CREATE:
+                self._marker_server.create(action.name)
+                pose = self._marker_server.get(action.name).pose
+                self._db.add(action.name, pose)
+                self._publish_poses()
+            elif action.command == UserAction.DELETE:
+                self._marker_server.delete(action.name)
+                self._db.delete(action.name)
+                self._publish_poses()
+            elif action.command == UserAction.GOTO:
+                pose = self._db.get(action.name)
+                if pose is None:
+                    rospy.logerr('No pose named {}'.format(action.name))
+                else:
+                    goal = MoveBaseGoal()
+                    goal.target_pose.header.frame_id = 'map'
+                    goal.target_pose.header.stamp = rospy.Time().now()
+                    goal.target_pose.pose = pose
+                    self._move_base_client.send_goal(goal)
             else:
-                goal = MoveBaseGoal()
-                goal.target_pose.header.frame_id = 'map'
-                goal.target_pose.header.stamp = rospy.Time().now()
-                goal.target_pose.pose = pose
-                self._move_base_client.send_goal(goal)
-        else:
-            rospy.logwarn('Unknown command: {}'.format(action.command))
+                rospy.logwarn('Unknown command: {}'.format(action.command))
+        except Exception as e:
+            rospy.logerr(e)
 
     def execute_goto(self, goal):
         result = GoToLocationResult()
@@ -197,11 +200,11 @@ class Server(object):
             rospy.logerr(result.error)
             return
         else:
-            goal = MoveBaseGoal()
-            goal.target_pose.header.frame_id = 'map'
-            goal.target_pose.header.stamp = rospy.Time().now()
-            goal.target_pose.pose = pose
-            self._move_base_client.send_goal(goal)
+            mb_goal = MoveBaseGoal()
+            mb_goal.target_pose.header.frame_id = 'map'
+            mb_goal.target_pose.header.stamp = rospy.Time().now()
+            mb_goal.target_pose.pose = pose
+            self._move_base_client.send_goal(mb_goal)
             state = self._move_base_client.get_state()
             while not rospy.is_shutdown():
                 if self._as.is_preempt_requested():
