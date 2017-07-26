@@ -1,20 +1,35 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/ros-topic/ros-topic.html">
 <link rel="import" href="../../bower_components/ros-websocket/ros-websocket.html">
+<link rel="import" href="../../bower_components/ros-rviz/ros-rviz.html">
 <link rel="import" href="../map-annotator-pose/map-annotator-pose.html">
 
 <dom-module id="map-annotator-app">
   <template>
+    <style is="custom-style" include="iron-flex"></style>
     <style>
       :host {
         display: block;
-        font-family: Sans-serif
+        font-family: Sans-serif;
+        height: 100%;
+      }
+      :host > div {
+        box-sizing: border-box;
+        height: 100%;
+          padding: 8px;
       }
       paper-button {
         background-color: #ccc;
         margin-bottom: 10px;
         text-transform: none;
+      }
+      #content {
+        height: 100%;
+      }
+      #controls {
+        min-width: 300px;
       }
     </style>
     <ros-websocket auto
@@ -38,14 +53,22 @@
       ros="{{ros}}"
       msg-type="map_annotator/UserAction"
     ></ros-topic>
-    <div>
-      Websocket status: {{status}}
+    <div class="layout vertical">
+      <h2>Map annotator</h2>
+      <div>
+        Websocket status: {{status}}
+      </div>
+      <div id="content" class="horizontal layout flex">
+        <div id="controls">
+          <h3>Poses</h2>
+          <paper-button on-tap="handleAdd">Add pose</paper-button>
+          <template is="dom-repeat" items="{{poseList.names}}">
+            <map-annotator-pose ros="{{ros}}" name="{{item}}"></map-annotator-pose>
+          </template>
+        </div>
+        <ros-rviz class="flex" id="rviz" ros="[[ros]]"></ros-rviz>
+      </div>
     </div>
-    <h3>Poses</h2>
-    <paper-button on-tap="handleAdd">Add pose</paper-button>
-    <template is="dom-repeat" items="{{poseList.names}}">
-      <map-annotator-pose ros="{{ros}}" name="{{item}}"></map-annotator-pose>
-    </template>
   </template>
 
   <script>
@@ -58,6 +81,53 @@
           type: String,
           value: 'Unknown.',
         },
+      },
+
+      ready: function() {
+        this.$.rviz.loadConfig({
+          globalOptions: {
+            background: '#113344',
+            fixedFrame: '/map',
+          },
+          displays: [
+            {
+              isShown: true,
+              name: 'Grid',
+              type: 'grid',
+              options: {
+                cellSize: 1,
+                color: '#cccccc',
+                numCells: 20,
+              },
+            }, {
+              isShown: true,
+              name: 'Current robot model',
+              type: 'urdf',
+              options: {
+                param: 'robot_description',
+                tfPrefix: ''
+              },
+            }, {
+              isShown: true,
+              name: 'Map',
+              type: 'occupancyGrid',
+              options: {
+                continuous: false,
+                opacity: 1.0,
+                topic: '/map',
+              },
+            }, {
+              isShown: true,
+              name: 'Poses',
+              type: 'interactiveMarkers',
+              options: {
+                topic: '/map_annotator/map_poses',
+              },
+            },
+
+          ],
+          sidebarOpened: false,
+        });
       },
 
       handleConnection: function() {
