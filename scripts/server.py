@@ -67,6 +67,26 @@ class PoseMarkers(object):
         int_marker.description = name
         int_marker.pose = pose
 
+        text_marker = Marker()
+        text_marker.type = Marker.TEXT_VIEW_FACING
+        text_marker.text = name
+        text_marker.pose.orientation.w = 1
+        text_marker.pose.position.z = 1.5
+        text_marker.scale.x = 0.4
+        text_marker.scale.y = 0.4
+        text_marker.scale.z = 0.4
+        text_marker.color.r = 0.5
+        text_marker.color.g = 0.5
+        text_marker.color.b = 0.5
+        text_marker.color.a = 1.0
+
+        text_control = InteractiveMarkerControl()
+        text_control.orientation.w = 1
+        text_control.interaction_mode = InteractiveMarkerControl.NONE
+        text_control.markers.append(text_marker)
+        text_control.always_visible = True
+        int_marker.controls.append(text_control)
+
         arrow_marker = Marker()
         arrow_marker.type = Marker.ARROW
         arrow_marker.pose.orientation.w = 1
