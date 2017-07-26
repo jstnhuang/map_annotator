@@ -71,7 +71,7 @@ class PoseMarkers(object):
         text_marker.type = Marker.TEXT_VIEW_FACING
         text_marker.text = name
         text_marker.pose.orientation.w = 1
-        text_marker.pose.position.z = 1.5
+        text_marker.pose.position.z = 1.7
         text_marker.scale.x = 0.4
         text_marker.scale.y = 0.4
         text_marker.scale.z = 0.4
