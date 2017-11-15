@@ -75,7 +75,7 @@
       },
 
       ready: function() {
-        this.$.rviz.loadConfig({
+        this.$.rviz.config = {
           globalOptions: {
             background: '#cccccc',
             fixedFrame: '/map',
@@ -118,7 +118,7 @@
 
           ],
           sidebarOpened: false,
-        });
+        };
       },
 
       handleConnection: function() {
