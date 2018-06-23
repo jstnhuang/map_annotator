@@ -229,6 +229,7 @@ class Server(object):
             while not rospy.is_shutdown():
                 if self._as.is_preempt_requested():
                     result.error = 'GoToLocationAction was preempted'
+                    self._move_base_client.cancel_all_goals()
                     self._as.set_preempted(result, result.error)
                     rospy.logerr(result.error)
                     return
@@ -240,6 +241,7 @@ class Server(object):
                     else:
                         result.error = 'The robot was unable to navigate to {}'.format(
                             goal.name)
+                        self._move_base_client.cancel_all_goals()
                         self._as.set_aborted(result, result.error)
                         rospy.logerr(result.error)
                         return
