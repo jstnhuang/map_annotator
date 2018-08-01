@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   roscpp
   rospy
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -65,12 +66,14 @@ add_message_files(
 add_action_files(
   FILES
   GoToLocation.action
+  GetPose.action
 )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   actionlib_msgs
+  geometry_msgs
 )
 
 ################################################
@@ -105,7 +108,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES map_annotator
-  CATKIN_DEPENDS actionlib_msgs roscpp rospy message_runtime
+  CATKIN_DEPENDS actionlib_msgs roscpp rospy message_runtime geometry_msgs
 #  DEPENDS system_lib
 )
 
