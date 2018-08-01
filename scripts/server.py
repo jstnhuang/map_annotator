@@ -6,7 +6,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from geometry_msgs.msg import Pose
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer
 from map_annotator.msg import PoseNames, UserAction
-from map_annotator.msg import GoToLocationAction, GoToLocationResult
+from map_annotator.msg import GoToLocationAction, GoToLocationResult, GetPoseAction, GetPoseResult 
 from visualization_msgs.msg import InteractiveMarker, InteractiveMarkerControl, InteractiveMarkerFeedback
 from visualization_msgs.msg import Marker
 import pickle
@@ -196,6 +196,12 @@ class GetPoseServer(object):
             result.pose = pose
             self._as.set_succeeded(result)
             return
+
+    def _publish_poses(self):
+        pn = PoseNames()
+        pn.names.extend(self._db.list())
+        self._list_pub.publish(pn)
+
 
 class Server(object):
     def __init__(self, db, list_pub, marker_server, move_base_client):
