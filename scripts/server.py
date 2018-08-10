@@ -6,7 +6,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from geometry_msgs.msg import Pose
 from interactive_markers.interactive_marker_server import InteractiveMarkerServer
 from map_annotator.msg import PoseNames, UserAction
-from map_annotator.msg import GoToLocationAction, GoToLocationResult
+from map_annotator.msg import GoToLocationAction, GoToLocationResult, GetPoseAction, GetPoseResult 
 from visualization_msgs.msg import InteractiveMarker, InteractiveMarkerControl, InteractiveMarkerFeedback
 from visualization_msgs.msg import Marker
 import pickle
@@ -166,6 +166,42 @@ def is_done_state(state):
             or state == GoalStatus.PREEMPTED or state == GoalStatus.ABORTED
             or state == GoalStatus.SUCCEEDED or state == GoalStatus.LOST)
 
+class GetPoseServer(object):
+    def __init__(self, db, list_pub, marker_server, move_base_client):
+        self._db = db
+        self._list_pub = list_pub
+        self._marker_server = marker_server
+        self._move_base_client = move_base_client
+        self._as = actionlib.SimpleActionServer(
+            '/map_annotator/get_pose',
+            GetPoseAction,
+            execute_cb=self.execute_getpose,
+            auto_start=False)
+
+    def start(self):
+        self._db.load()
+        self._as.start()
+        self._marker_server.start()
+        self._publish_poses()
+        
+    def execute_getpose(self, goal):
+        result = GetPoseResult()
+        pose = self._db.get(goal.name)
+        if pose is None:
+            result.error = 'No pose named {}'.format(goal.name)
+            self._as.set_aborted(result, result.error)
+            rospy.logerr(result.error)
+            return
+        else:
+            result.pose = pose
+            self._as.set_succeeded(result)
+            return
+
+    def _publish_poses(self):
+        pn = PoseNames()
+        pn.names.extend(self._db.list())
+        self._list_pub.publish(pn)
+
 
 class Server(object):
     def __init__(self, db, list_pub, marker_server, move_base_client):
@@ -269,12 +305,14 @@ def main():
     marker_server = PoseMarkers(database, im_server)
     move_base = actionlib.SimpleActionClient('/move_base', MoveBaseAction)
     server = Server(database, list_pub, marker_server, move_base)
+    getposeserver = GetPoseServer(database, list_pub, marker_server, move_base)
     user_action_sub = rospy.Subscriber('/map_annotator/user_actions',
                                        UserAction, server.handle_user_action)
 
     rospy.sleep(0.5)
     marker_server.start()
     server.start()
+    getposeserver.start()
 
     def handle_shutdown():
         pn = PoseNames()
